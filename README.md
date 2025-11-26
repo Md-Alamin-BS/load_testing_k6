@@ -42,31 +42,20 @@ A modular performance testing framework for API testing with real-time metrics v
 
 ---
 
-## Running Tests: npm vs k6 Direct
+## Running Tests: npm or k6 Direct
 
-**Should I install npm?**
-
-- **Use npm (Recommended)**: If you want simpler, shorter commands
+- **Use npm (Recommended)**: If want simpler, shorter commands
   - ✅ Easier to remember: `npm run test:load`
-  - ✅ Scripts handle long commands for you
+  - ✅ Scripts handle long commands
   - ✅ Good for regular testing
   
-- **Use k6 directly (No npm)**: If you prefer not to install Node.js/npm
+- **Use k6 directly (No npm)**: If prefer not to install Node.js/npm
   - ✅ Only need k6 installed
   - ✅ Full control over command parameters
   - ✅ No additional dependencies
   - ⚠️ Commands are longer
 
-**Both methods work identically** - choose based on your preference!
-
-### Quick Comparison
-
-| Feature | npm Method | Direct k6 Method |
-|---------|-----------|------------------|
-| **Prerequisites** | k6 + Docker + npm | k6 + Docker only |
-| **Command Length** | Short (`npm run test:load`) | Long (full k6 command) |
-| **Flexibility** | Pre-configured scripts | Full command control |
-| **Best For** | Regular testing, beginners | Advanced users, CI/CD customization |
+**Both methods work identically** - choose based on preference!
 
 ---
 
@@ -85,7 +74,7 @@ A modular performance testing framework for API testing with real-time metrics v
 
 # Install Node.js/npm (Optional - for simplified commands)
 # Download from https://nodejs.org/
-# OR skip if you prefer using k6 commands directly
+# OR skip if prefer using k6 commands directly
 
 # Verify installations
 k6 version
@@ -120,7 +109,7 @@ docker-compose up -d
 docker-compose ps
 ```
 
-**Services Started:**
+**Services Started:** Goto these URLs
 - InfluxDB: `http://localhost:8086`
 - Grafana: `http://localhost:3000` (admin/admin)
 
@@ -284,10 +273,34 @@ assignment_k6/
 
 ## Troubleshooting
 
-### Issue: "No Data" in Grafana
+### Issue: Test runs successfully but no data visible in Grafana
+**Root Cause:** RUN_ID environment variable was not set before running the test.
+
+**Solution:**
+Always set RUN_ID before running tests:
+
+```powershell
+# Windows PowerShell
+$env:RUN_ID="test-001"
+npm run test:load
+```
+
+```bash
+# Linux/macOS
+export RUN_ID="test-001"
+npm run test:load
+```
+
+**Why this matters:**
+- ✅ Test data IS sent to InfluxDB (you'll see `output: InfluxDBv1` in console)
+- ❌ Without RUN_ID, data isn't tagged with an identifier
+- ❌ Grafana dashboard dropdown won't show test run
+- ✅ Setting RUN_ID allows to filter and view specific test results
+
+### Issue: "No Data" in Grafana (when RUN_ID was set)
 **Solution:**
 1. Set time range to "Last 6 hours"
-2. Verify Run ID is correct
+2. Verify Run ID is correct in dropdown
 3. Check InfluxDB has data:
    ```bash
    docker exec k6-influxdb influx -database k6 -execute "SELECT COUNT(*) FROM http_reqs"
