@@ -42,22 +42,56 @@ A modular performance testing framework for API testing with real-time metrics v
 
 ---
 
-## Quick Start - Local Setup (5 Minutes)
+## Running Tests: npm vs k6 Direct
+
+**Should I install npm?**
+
+- **Use npm (Recommended)**: If you want simpler, shorter commands
+  - ✅ Easier to remember: `npm run test:load`
+  - ✅ Scripts handle long commands for you
+  - ✅ Good for regular testing
+  
+- **Use k6 directly (No npm)**: If you prefer not to install Node.js/npm
+  - ✅ Only need k6 installed
+  - ✅ Full control over command parameters
+  - ✅ No additional dependencies
+  - ⚠️ Commands are longer
+
+**Both methods work identically** - choose based on your preference!
+
+### Quick Comparison
+
+| Feature | npm Method | Direct k6 Method |
+|---------|-----------|------------------|
+| **Prerequisites** | k6 + Docker + npm | k6 + Docker only |
+| **Command Length** | Short (`npm run test:load`) | Long (full k6 command) |
+| **Flexibility** | Pre-configured scripts | Full command control |
+| **Best For** | Regular testing, beginners | Advanced users, CI/CD customization |
+
+---
+
+## Quick Start - Local Setup
 
 ### Step 1: Install Prerequisites
 
 ```bash
-# Install k6
+# Install k6 (Required)
 # Windows: choco install k6
 # macOS: brew install k6
 # Linux: sudo apt-get install k6
 
-# Install Docker Desktop
+# Install Docker Desktop (Required)
 # Download from https://docs.docker.com/get-docker/
+
+# Install Node.js/npm (Optional - for simplified commands)
+# Download from https://nodejs.org/
+# OR skip if you prefer using k6 commands directly
 
 # Verify installations
 k6 version
 docker --version
+node --version  # Optional
+npm --version   # Optional
 ```
 
 ### Step 2: Clone and Configure
@@ -92,18 +126,35 @@ docker-compose ps
 
 ### Step 4: Run Your First Test
 
+**Option A: Using npm (Recommended - Simpler)**
+
 ```bash
-# Set unique Run ID
+# Set unique Run ID (Linux/macOS)
 export RUN_ID="test-001"
+
+# Set unique Run ID (Windows PowerShell)
+$env:RUN_ID="test-001"
 
 # Run load test
 npm run test:load
+```
 
-# Expected output:
-# status is 200
-# response time < 500ms
-# checks............: 100.00%
-# http_req_duration.: avg=245ms p(95)=450ms
+**Option B: Using k6 directly (No npm needed)**
+
+```bash
+# Windows PowerShell
+$env:RUN_ID="test-001"; k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=load tests/scenarios/load-test.js
+
+# Linux/macOS
+RUN_ID="test-001" k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=load tests/scenarios/load-test.js
+```
+
+**Expected output:**
+```
+✓ status is 200
+✓ response time < 500ms
+checks............: 100.00%
+http_req_duration.: avg=245ms p(95)=450ms
 ```
 
 ### Step 5: View Results in Grafana
@@ -261,26 +312,112 @@ docker-compose up -d
 - Check workflow logs in Actions tab
 - Ensure YAML syntax is correct
 
+### Issue: "npm: command not found" or don't want to install npm
+**Solution:**
+You don't need npm! Use k6 directly:
+
+**Windows PowerShell:**
+```powershell
+$env:RUN_ID="test-001"; k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=load tests/scenarios/load-test.js
+```
+
+**Linux/macOS:**
+```bash
+RUN_ID="test-001" k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=load tests/scenarios/load-test.js
+```
+
+See the "Common Test Commands" section below for all test types.
+
 ---
 
 ## Common Test Commands
 
+### Using npm (Recommended - Simpler)
+
 ```bash
-# Local tests
+# Set Run ID first (Linux/macOS)
+export RUN_ID="my-test-001"
+
+# Set Run ID first (Windows PowerShell)
+$env:RUN_ID="my-test-001"
+
+# Run scenario tests
 npm run test:load          # Load test
 npm run test:stress        # Stress test
 npm run test:soak          # Soak test
 npm run test:spike         # Spike test
-npm run test:workflow      # Workflow test
+npm run test:edge-cases    # Edge cases test
 
-# With custom Run ID
-export RUN_ID="my-test-001"
-npm run test:load
+# Run workflow test
+npm run test:workflow      # Course completion workflow
 
-# Using PowerShell scripts
+# Run all endpoints test
+npm run test:endpoints     # All endpoints combined
+
+# Run individual endpoint tests
+npm run test:topics        # Topics endpoint
+npm run test:courses       # Courses endpoint
+npm run test:course-by-id  # Course by ID endpoint
+npm run test:enroll        # Enroll endpoint
+npm run test:update-progress     # Update progress endpoint
+npm run test:quiz-complete       # Quiz complete endpoint
+npm run test:mycourses           # My courses endpoint
+npm run test:recommendations     # Recommendations endpoint
+npm run test:section-quizzes     # Section quizzes endpoint
+npm run test:topics-by-id-courses # Courses by topic endpoint
+```
+
+### Using k6 directly (No npm needed)
+
+```bash
+# Windows PowerShell - Scenario Tests
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=load tests/scenarios/load-test.js
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=stress tests/scenarios/stress-test.js
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=soak tests/scenarios/soak-test.js
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=spike tests/scenarios/spike-test.js
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=edge-cases tests/scenarios/edge-cases.js
+
+# Windows PowerShell - Workflow & Endpoints
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 tests/workflows/course-completion-workflow.js
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/all-endpoints.js
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/topics.js
+$env:RUN_ID="my-test-001"; k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/courses.js
+
+# Linux/macOS - Scenario Tests
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=load tests/scenarios/load-test.js
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=stress tests/scenarios/stress-test.js
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=soak tests/scenarios/soak-test.js
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=spike tests/scenarios/spike-test.js
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=edge-cases tests/scenarios/edge-cases.js
+
+# Linux/macOS - Workflow & Endpoints
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 tests/workflows/course-completion-workflow.js
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/all-endpoints.js
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/topics.js
+RUN_ID="my-test-001" k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/courses.js
+
+# See package.json for complete list of all individual endpoint tests
+```
+
+### Using PowerShell/Bash Scripts (Alternative)
+
+```powershell
+# Windows PowerShell
 .\scripts\run-test.ps1 -TestType load -RunId "test-001"
+.\scripts\run-test.ps1 -TestType stress -RunId "test-002"
+.\scripts\run-test.ps1 -TestType topics -RunId "test-003"
+.\scripts\run-test.ps1 -TestType enroll -RunId "test-004"
 
-# Docker infrastructure
+# Linux/macOS Bash
+./scripts/run-test.sh test-001 load dev
+./scripts/run-test.sh test-002 stress dev
+./scripts/run-test.sh test-003 topics dev
+./scripts/run-test.sh test-004 enroll dev
+```
+
+### Docker Infrastructure
+
+```bash
 docker-compose up -d       # Start services
 docker-compose down        # Stop services
 docker-compose ps          # Check status
