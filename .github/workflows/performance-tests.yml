@@ -290,11 +290,12 @@ jobs:
         run: |
           max_attempts=30
           attempt=0
-          until docker compose exec -T influxdb influx ping || [ $attempt -eq $max_attempts ]; do
+          until curl -f http://localhost:8086/health || [ $attempt -eq $max_attempts ]; do
             echo "Waiting for InfluxDB to be ready... ($attempt/$max_attempts)"
             sleep 2
             attempt=$((attempt + 1))
           done
+          echo "InfluxDB is ready!"
       
       - name: Run k6 test in Docker
         run: |
@@ -362,23 +363,23 @@ jobs:
               ;;
           esac
       
-      - name: Create results directory
+      - name: Create results directories
         if: always()
-        run: mkdir -p results
+        run: |
+          mkdir -p "${{ github.workspace }}/results/grafana"
+          mkdir -p "${{ github.workspace }}/results/logs"
       
       - name: Export Grafana dashboards
         if: always()
         run: |
-          mkdir -p results/grafana
           # Export dashboards (if Grafana API is accessible)
           echo "Grafana is running at http://localhost:3000"
       
       - name: Collect Docker logs
         if: always()
         run: |
-          mkdir -p results/logs
-          docker compose logs influxdb > results/logs/influxdb.log
-          docker compose logs grafana > results/logs/grafana.log
+          docker compose logs influxdb > "${{ github.workspace }}/results/logs/influxdb.log" 2>&1 || echo "No InfluxDB logs"
+          docker compose logs grafana > "${{ github.workspace }}/results/logs/grafana.log" 2>&1 || echo "No Grafana logs"
       
       - name: Stop Docker services
         if: always()
@@ -391,3 +392,4 @@ jobs:
           name: docker-test-results-${{ github.run_number }}
           path: results/
           retention-days: 30
+ 
