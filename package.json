@@ -1,0 +1,37 @@
+{
+  "name": "k6-performance-testing-framework",
+  "version": "1.0.0",
+  "description": "Scalable k6 performance testing framework with InfluxDB and Grafana integration",
+  "main": "index.js",
+  "scripts": {
+    "test:load": "k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=load tests/scenarios/load-test.js",
+    "test:stress": "k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=stress tests/scenarios/stress-test.js",
+    "test:soak": "k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=soak tests/scenarios/soak-test.js",
+    "test:spike": "k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=spike tests/scenarios/spike-test.js",
+    "test:edge-cases": "k6 run --out influxdb=http://localhost:8086/k6 --env TEST_TYPE=edge-cases tests/scenarios/edge-cases.js",
+    "test:workflow": "k6 run --out influxdb=http://localhost:8086/k6 tests/workflows/course-completion-workflow.js",
+    "test:endpoints": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/all-endpoints.js",
+    "test:topics": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/topics.js",
+    "test:courses": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/courses.js",
+    "test:course-by-id": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/course-by-id.js",
+    "test:enroll": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/enroll.js",
+    "test:update-progress": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/update-progress.js",
+    "test:quiz-complete": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/quiz-complete.js",
+    "test:mycourses": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/mycourses.js",
+    "test:recommendations": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/recommendations.js",
+    "test:section-quizzes": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/section-quizzes.js",
+    "test:topics-by-id-courses": "k6 run --out influxdb=http://localhost:8086/k6 tests/endpoints/topics-by-id-courses.js",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "keywords": [
+    "k6",
+    "performance-testing",
+    "load-testing",
+    "influxdb",
+    "grafana"
+  ],
+  "author": "Md. Al-Amin",
+  "license": "MIT"
+}

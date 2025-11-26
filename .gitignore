@@ -4,6 +4,9 @@
 # k6 results
 results/
 *.json
+!grafana/dashboards/*.json
+!package.json
+!api-spec.json
 *.html
 
 # Node modules (if using npm for any utilities)
