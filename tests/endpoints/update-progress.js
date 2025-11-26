@@ -1,6 +1,3 @@
-// tests/endpoints/update-progress.js
-// Test for /courses/update_progress endpoint
-
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { config } from '../../config/test-config.js';

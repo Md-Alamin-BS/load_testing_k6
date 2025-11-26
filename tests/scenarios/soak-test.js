@@ -1,6 +1,3 @@
-// tests/scenarios/soak-test.js
-// Soak Testing: Tests system stability over extended period
-
 import { group } from 'k6';
 import { config } from '../../config/test-config.js';
 import { authenticate } from '../../utils/auth.js';
@@ -81,18 +78,18 @@ export default function (authData) {
       break;
   }
   
-  randomSleep(2, 4); // Moderate pacing for soak test
+  randomSleep(2, 4);
 }
 
 export function teardown(data) {
   console.log('=== Soak Test Completed ===');
   console.log('Review metrics for performance degradation trends');
   console.log('');
-  console.log('📊 View Results:');
+  console.log('View Results:');
   console.log('   Grafana Dashboard: http://localhost:3000');
   console.log('   InfluxDB:          http://localhost:8086');
   console.log('');
-  console.log('💡 Tips:');
+  console.log('Tips:');
   console.log('   - Login to Grafana with admin/admin');
   console.log('   - Select Run ID from dropdown to filter results');
   console.log('   - Look for memory leaks or performance degradation over time');

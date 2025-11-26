@@ -1,7 +1,3 @@
-// tests/workflows/course-completion-workflow.js
-// Workflow test simulating complete course completion journey
-// This test chains multiple API calls in sequence to simulate real user behavior
-
 import { group, sleep } from 'k6';
 import { config } from '../../config/test-config.js';
 import { authenticate } from '../../utils/auth.js';
@@ -29,7 +25,7 @@ export const options = {
     },
   },
   thresholds: Object.assign({}, config.thresholds, {
-    'workflow_duration': ['p(95)<20000'], // Workflow should complete in under 20s for 95% of cases (7-step journey)
+    'workflow_duration': ['p(95)<20000'],
   }),
   tags: {
     testType: 'workflow',
@@ -91,15 +87,15 @@ export default function (authData) {
             courseId = courses[0].id || courses[0].course_id || 1;
             logInfo(`${workflowName}: Selected course ID ${courseId}`);
           } else {
-            courseId = 1; // Fallback
+            courseId = 1;
           }
         } catch (e) {
-          courseId = 1; // Fallback
+          courseId = 1;
           logError(`${workflowName}: Could not extract course ID, using fallback`);
         }
       } else {
         workflowSuccess = false;
-        courseId = 1; // Fallback
+        courseId = 1;
         logError(`${workflowName}: Browse courses failed`);
       }
     });

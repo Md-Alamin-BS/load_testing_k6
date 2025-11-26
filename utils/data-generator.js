@@ -1,6 +1,3 @@
-// utils/data-generator.js
-// Data generation utilities for creating realistic test data
-
 import { randomInt, randomChoice } from './helpers.js';
 
 /**
@@ -136,9 +133,9 @@ export function generateEnrollmentScenario() {
   
   const scenarios = {
     beginner: {
-      coursePreference: [1, 2, 3], // Easier courses
-      progressPattern: 'slow', // More time per section
-      quizAttempts: 2, // May retry quizzes
+      coursePreference: [1, 2, 3],
+      progressPattern: 'slow',
+      quizAttempts: 2,
     },
     intermediate: {
       coursePreference: [4, 5, 6, 7],
@@ -152,7 +149,7 @@ export function generateEnrollmentScenario() {
     },
     casual: {
       coursePreference: sampleCourseIds,
-      progressPattern: 'irregular', // May skip sections
+      progressPattern: 'irregular',
       quizAttempts: 1,
     },
   };
@@ -174,7 +171,7 @@ export function generateEnrollmentScenario() {
 export function getTimeBasedLoadMultiplier() {
   const hour = new Date().getHours();
   
-  // Peak hours: 9-12, 14-17, 19-22 (working hours + evening)
+  // Peak hours: 9-12, 14-17, 19-22
   if ((hour >= 9 && hour <= 12) || (hour >= 14 && hour <= 17) || (hour >= 19 && hour <= 22)) {
     return 1.5; // 50% more load
   }

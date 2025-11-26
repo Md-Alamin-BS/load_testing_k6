@@ -1,6 +1,3 @@
-// tests/scenarios/stress-test.js
-// Stress Testing: Tests system behavior beyond normal load to find breaking point
-
 import { group } from 'k6';
 import { config } from '../../config/test-config.js';
 import { authenticate } from '../../utils/auth.js';
@@ -87,11 +84,11 @@ export function teardown(data) {
   console.log('=== Stress Test Completed ===');
   console.log('Review metrics to identify system breaking points and bottlenecks');
   console.log('');
-  console.log('📊 View Results:');
+  console.log('View Results:');
   console.log('   Grafana Dashboard: http://localhost:3000');
   console.log('   InfluxDB:          http://localhost:8086');
   console.log('');
-  console.log('💡 Tips:');
+  console.log('Tips:');
   console.log('   - Login to Grafana with admin/admin');
   console.log('   - Select Run ID from dropdown to filter results');
   console.log('   - Check P95 response times during peak load');

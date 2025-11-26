@@ -1,6 +1,3 @@
-// utils/metrics.js
-// Custom metrics for enhanced monitoring
-
 import { Counter, Rate, Trend, Gauge } from 'k6/metrics';
 
 // Custom metrics for endpoint performance

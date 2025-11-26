@@ -1,6 +1,3 @@
-// tests/endpoints/quiz-complete.js
-// Test for /courses/{course_id}/sections/{section_index}/quiz-complete endpoint
-
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { config } from '../../config/test-config.js';

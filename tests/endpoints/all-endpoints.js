@@ -1,6 +1,3 @@
-// tests/endpoints/all-endpoints.js
-// Combined test for all endpoints
-
 import { group } from 'k6';
 import { config } from '../../config/test-config.js';
 import { authenticate } from '../../utils/auth.js';

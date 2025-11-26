@@ -1,6 +1,3 @@
-// tests/endpoints/course-by-id-test-function.js
-// Reusable test function for GET /courses/{id} endpoint
-
 import http from 'k6/http';
 import { config } from '../../config/test-config.js';
 import { createAuthParams } from '../../utils/auth.js';

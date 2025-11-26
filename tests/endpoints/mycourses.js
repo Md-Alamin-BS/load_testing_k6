@@ -1,6 +1,3 @@
-// tests/endpoints/mycourses.js
-// Test for /mycourses endpoint - Get enrolled courses
-
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { config } from '../../config/test-config.js';

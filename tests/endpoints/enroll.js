@@ -1,6 +1,3 @@
-// tests/endpoints/enroll.js
-// Test for /enroll endpoint
-
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { config } from '../../config/test-config.js';

@@ -1,6 +1,3 @@
-// tests/endpoints/section-quizzes.js
-// Test for /section-quizzes endpoint - Get quiz questions for a section
-
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { config } from '../../config/test-config.js';
@@ -60,5 +57,4 @@ export default function (data) {
 }
 
 export function teardown(data) {
-  // Cleanup if needed
 }

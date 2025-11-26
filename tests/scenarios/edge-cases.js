@@ -1,7 +1,3 @@
-// tests/scenarios/edge-cases.js
-// Comprehensive edge case and negative testing suite
-// Tests boundary conditions, invalid inputs, error handling, and race conditions
-
 import { group, check } from 'k6';
 import http from 'k6/http';
 import { config } from '../../config/test-config.js';
@@ -39,9 +35,6 @@ export function setup() {
 export default function (authData) {
   const { token, userId } = authData;
   
-  // ========================================
-  // 1. BOUNDARY VALUE TESTING
-  // ========================================
   group('Boundary Values - Course Progress', () => {
     logInfo('Testing progress boundary values');
     
@@ -104,9 +97,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 2. INVALID ID TESTING
-  // ========================================
   group('Invalid IDs - Non-existent Resources', () => {
     logInfo('Testing invalid resource IDs');
     
@@ -150,9 +140,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 3. MALFORMED REQUEST TESTING
-  // ========================================
   group('Malformed Requests', () => {
     logInfo('Testing malformed payloads');
     
@@ -202,9 +189,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 4. DUPLICATE OPERATIONS
-  // ========================================
   group('Duplicate Operations - Idempotency', () => {
     logInfo('Testing duplicate enrollments');
     
@@ -234,9 +218,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 5. AUTHORIZATION & AUTHENTICATION EDGE CASES
-  // ========================================
   group('Authorization - Invalid Tokens', () => {
     logInfo('Testing invalid authentication');
     
@@ -268,9 +249,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 6. QUERY PARAMETER EDGE CASES
-  // ========================================
   group('Query Parameters - Invalid Values', () => {
     logInfo('Testing invalid query parameters');
     
@@ -313,9 +291,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 7. RACE CONDITIONS & CONCURRENT UPDATES
-  // ========================================
   group('Concurrent Operations - Race Conditions', () => {
     logInfo('Testing concurrent progress updates');
     
@@ -343,9 +318,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 8. SPECIAL CHARACTERS & INJECTION ATTEMPTS
-  // ========================================
   group('Input Validation - Special Characters', () => {
     logInfo('Testing special character handling');
     
@@ -370,9 +342,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 9. HTTP METHOD VIOLATIONS
-  // ========================================
   group('HTTP Method Violations', () => {
     logInfo('Testing wrong HTTP methods');
     
@@ -398,9 +367,6 @@ export default function (authData) {
   
   randomSleep(1, 2);
   
-  // ========================================
-  // 10. PAGINATION & LIMITS
-  // ========================================
   group('Pagination Edge Cases', () => {
     logInfo('Testing pagination boundaries');
     
@@ -446,11 +412,11 @@ export function teardown(data) {
   logInfo('Edge Case Testing Completed');
   logInfo('Review results for security vulnerabilities and error handling issues');
   console.log('');
-  console.log('📊 View Results:');
+  console.log('View Results:');
   console.log('   Grafana Dashboard: http://localhost:3000');
   console.log('   InfluxDB:          http://localhost:8086');
   console.log('');
-  console.log('💡 Tips:');
+  console.log('Tips:');
   console.log('   - Login to Grafana with admin/admin');
   console.log('   - High error rate is expected for edge case testing');
   console.log('   - Review which endpoints handled invalid inputs correctly');

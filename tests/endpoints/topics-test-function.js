@@ -1,6 +1,3 @@
-// tests/endpoints/topics-test-function.js
-// Reusable test function for topics endpoint
-
 import http from 'k6/http';
 import { config } from '../../config/test-config.js';
 import { createAuthParams } from '../../utils/auth.js';

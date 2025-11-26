@@ -1,6 +1,3 @@
-// tests/endpoints/recommendations.js
-// Test for /recommendations endpoint - AI-powered course recommendations
-
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { config } from '../../config/test-config.js';

@@ -1,7 +1,5 @@
 #!/bin/bash
-# Script to run k6 tests with InfluxDB output
 
-# Set test configuration from arguments or use defaults
 export RUN_ID="${1:-run-$(date +%s)}"
 export TEST_TYPE="${2:-load}"
 export ENVIRONMENT="${3:-dev}"
@@ -28,6 +26,9 @@ case "$TEST_TYPE" in
   spike)
     k6 run tests/scenarios/spike-test.js
     ;;
+  edge)
+    k6 run tests/scenarios/edge-cases.js
+    ;;
   workflow)
     k6 run tests/workflows/course-completion-workflow.js
     ;;
@@ -36,7 +37,7 @@ case "$TEST_TYPE" in
     ;;
   *)
     echo "Unknown test type: $TEST_TYPE"
-    echo "Available types: load, stress, soak, spike, workflow, endpoints"
+    echo "Available types: load, stress, soak, spike, edge, workflow, endpoints"
     exit 1
     ;;
 esac

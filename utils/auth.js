@@ -1,6 +1,3 @@
-// utils/auth.js
-// Authentication utility for handling login and token management
-
 import http from 'k6/http';
 import { check } from 'k6';
 import { config } from '../config/test-config.js';

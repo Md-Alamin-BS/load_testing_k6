@@ -1,6 +1,3 @@
-// tests/scenarios/spike-test.js
-// Spike Testing: Tests system behavior under sudden load spikes
-
 import { group } from 'k6';
 import { config } from '../../config/test-config.js';
 import { authenticate } from '../../utils/auth.js';
@@ -88,11 +85,11 @@ export function teardown(data) {
   console.log('=== Spike Test Completed ===');
   console.log('Review metrics for recovery time and error rates during spike');
   console.log('');
-  console.log('📊 View Results:');
+  console.log('View Results:');
   console.log('   Grafana Dashboard: http://localhost:3000');
   console.log('   InfluxDB:          http://localhost:8086');
   console.log('');
-  console.log('💡 Tips:');
+  console.log('Tips:');
   console.log('   - Login to Grafana with admin/admin');
   console.log('   - Select Run ID from dropdown to filter results');
   console.log('   - Check how system handled sudden traffic spike');

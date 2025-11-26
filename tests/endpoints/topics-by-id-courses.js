@@ -1,6 +1,3 @@
-// tests/endpoints/topics-by-id-courses.js
-// Test for GET /topics/{topic_id}/courses endpoint - Get courses by topic
-
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { config } from '../../config/test-config.js';
@@ -59,5 +56,4 @@ export default function (data) {
 }
 
 export function teardown(data) {
-  // Cleanup if needed
 }

@@ -1,14 +1,11 @@
 FROM grafana/k6:latest
 
-# Install additional dependencies if needed
 USER root
 
-# Copy test files
 COPY tests /tests
 COPY config /config
 COPY utils /utils
 
-# Set working directory
 WORKDIR /
 
 # Set environment variables
