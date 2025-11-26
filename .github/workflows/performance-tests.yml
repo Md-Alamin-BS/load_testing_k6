@@ -31,6 +31,15 @@ on:
         description: 'Run ID for this test execution'
         required: false
         default: ''
+      run_mode:
+        description: 'Which job to run'
+        required: true
+        default: 'performance-only'
+        type: choice
+        options:
+          - performance-only
+          - docker-only
+          - both
   
   # Scheduled execution (optional - runs every day at 2 AM UTC)
   schedule:
@@ -56,6 +65,10 @@ jobs:
   performance-test:
     name: Run K6 Performance Tests
     runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_dispatch' || 
+      github.event.inputs.run_mode == 'performance-only' || 
+      github.event.inputs.run_mode == 'both'
     
     steps:
       - name: Checkout code
@@ -256,7 +269,10 @@ jobs:
   docker-test:
     name: Run Tests in Docker
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch'
+    if: |
+      github.event_name == 'workflow_dispatch' && 
+      (github.event.inputs.run_mode == 'docker-only' || 
+       github.event.inputs.run_mode == 'both')
     
     steps:
       - name: Checkout code
