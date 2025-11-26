@@ -1,4 +1,4 @@
-# K6 Performance Testing Framework
+# K6 Performance Testing
 
 A modular performance testing framework for API testing with real-time metrics visualization in Grafana and CI/CD automation.
 
