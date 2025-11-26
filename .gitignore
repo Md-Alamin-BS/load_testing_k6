@@ -1,0 +1,28 @@
+# Environment variables
+.env
+
+# k6 results
+results/
+*.json
+*.html
+
+# Node modules (if using npm for any utilities)
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Docker
+docker-data/
+influxdb-data/
+grafana-data/

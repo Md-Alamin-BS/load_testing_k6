@@ -1,0 +1,281 @@
+name: K6 Performance Tests
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test to run'
+        required: true
+        default: 'load'
+        type: choice
+        options:
+          - load
+          - stress
+          - soak
+          - spike
+          - workflow
+          - endpoints
+      run_id:
+        description: 'Run ID for this test execution'
+        required: false
+        default: ''
+  
+  # Scheduled execution (optional - runs every day at 2 AM UTC)
+  schedule:
+    - cron: '0 2 * * *'
+  
+  # Run on pull requests (optional)
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  BASE_URL: ${{ secrets.BASE_URL || 'https://api.polanji.com' }}
+  WEBSITE_URL: ${{ secrets.WEBSITE_URL || 'https://www.polanji.com' }}
+  USER_EMAIL: ${{ secrets.USER_EMAIL || 'performancetest07@gmail.com' }}
+  USER_PASSWORD: ${{ secrets.USER_PASSWORD || 'user123456' }}
+  INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
+  INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
+  INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG || 'k6-org' }}
+  INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET || 'k6-metrics' }}
+
+jobs:
+  performance-test:
+    name: Run K6 Performance Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up environment variables
+        id: setup
+        run: |
+          # Generate run ID if not provided
+          if [ -z "${{ github.event.inputs.run_id }}" ]; then
+            RUN_ID="run-${{ github.run_number }}-$(date +%Y%m%d%H%M%S)"
+          else
+            RUN_ID="${{ github.event.inputs.run_id }}"
+          fi
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+          
+          # Set test type
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            TEST_TYPE="${{ github.event.inputs.test_type }}"
+          else
+            TEST_TYPE="load"
+          fi
+          echo "TEST_TYPE=$TEST_TYPE" >> $GITHUB_ENV
+          
+          # Set environment
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            ENVIRONMENT="production"
+          else
+            ENVIRONMENT="dev"
+          fi
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+          
+          echo "::notice::Run ID: $RUN_ID, Test Type: $TEST_TYPE, Environment: $ENVIRONMENT"
+      
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+      
+      - name: Verify k6 installation
+        run: k6 version
+      
+      - name: Run Performance Test
+        id: k6_test
+        run: |
+          # Set k6 output configuration for InfluxDB (if configured)
+          if [ -n "${{ secrets.INFLUXDB_URL }}" ]; then
+            export K6_OUT="influxdb=${{ secrets.INFLUXDB_URL }}"
+            export K6_INFLUXDB_ORGANIZATION="${{ env.INFLUXDB_ORG }}"
+            export K6_INFLUXDB_BUCKET="${{ env.INFLUXDB_BUCKET }}"
+            export K6_INFLUXDB_TOKEN="${{ secrets.INFLUXDB_TOKEN }}"
+            export K6_INFLUXDB_INSECURE="false"
+          fi
+          
+          # Determine which test to run
+          case "${{ env.TEST_TYPE }}" in
+            load)
+              k6 run tests/scenarios/load-test.js --summary-export=results/summary.json
+              ;;
+            stress)
+              k6 run tests/scenarios/stress-test.js --summary-export=results/summary.json
+              ;;
+            soak)
+              k6 run tests/scenarios/soak-test.js --summary-export=results/summary.json
+              ;;
+            spike)
+              k6 run tests/scenarios/spike-test.js --summary-export=results/summary.json
+              ;;
+            workflow)
+              k6 run tests/workflows/course-completion-workflow.js --summary-export=results/summary.json
+              ;;
+            endpoints)
+              k6 run tests/endpoints/all-endpoints.js --summary-export=results/summary.json
+              ;;
+            *)
+              echo "Unknown test type: ${{ env.TEST_TYPE }}"
+              exit 1
+              ;;
+          esac
+      
+      - name: Create results directory
+        if: always()
+        run: mkdir -p results
+      
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "# K6 Performance Test Results" > results/report.md
+          echo "" >> results/report.md
+          echo "**Run ID:** ${{ env.RUN_ID }}" >> results/report.md
+          echo "**Test Type:** ${{ env.TEST_TYPE }}" >> results/report.md
+          echo "**Environment:** ${{ env.ENVIRONMENT }}" >> results/report.md
+          echo "**Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> results/report.md
+          echo "**Triggered by:** ${{ github.actor }}" >> results/report.md
+          echo "" >> results/report.md
+          
+          if [ -f results/summary.json ]; then
+            echo "## Test Summary" >> results/report.md
+            echo '```json' >> results/report.md
+            cat results/summary.json | jq '.' >> results/report.md
+            echo '```' >> results/report.md
+          fi
+          
+          if [ -n "${{ secrets.INFLUXDB_URL }}" ]; then
+            echo "" >> results/report.md
+            echo "## View Detailed Results" >> results/report.md
+            echo "Access Grafana dashboards to view detailed metrics:" >> results/report.md
+            echo "- **Endpoint Dashboard:** Filter by Run ID: \`${{ env.RUN_ID }}\`" >> results/report.md
+            echo "- **Workflow Dashboard:** Filter by Run ID: \`${{ env.RUN_ID }}\`" >> results/report.md
+          fi
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-test-results-${{ env.RUN_ID }}
+          path: |
+            results/
+          retention-days: 30
+      
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('results/report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+      
+      - name: Check test thresholds
+        if: always()
+        run: |
+          # This step will fail if k6 thresholds are not met
+          # The exit code from k6 will determine if this job fails
+          if [ ${{ steps.k6_test.outcome }} == 'failure' ]; then
+            echo "::error::Performance test thresholds not met!"
+            exit 1
+          fi
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Performance test failed for Run ID: ${{ env.RUN_ID }}"
+          echo "::error::Test Type: ${{ env.TEST_TYPE }}"
+          echo "::error::Check the uploaded artifacts for detailed results"
+
+  docker-test:
+    name: Run Tests in Docker
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Start Docker services
+        run: |
+          docker-compose up -d influxdb grafana
+          sleep 30  # Wait for services to be ready
+      
+      - name: Wait for InfluxDB to be ready
+        run: |
+          max_attempts=30
+          attempt=0
+          until docker-compose exec -T influxdb influx ping || [ $attempt -eq $max_attempts ]; do
+            echo "Waiting for InfluxDB to be ready... ($attempt/$max_attempts)"
+            sleep 2
+            attempt=$((attempt + 1))
+          done
+      
+      - name: Run k6 test in Docker
+        run: |
+          RUN_ID="docker-run-${{ github.run_number }}-$(date +%Y%m%d%H%M%S)"
+          TEST_TYPE="${{ github.event.inputs.test_type || 'load' }}"
+          
+          case "$TEST_TYPE" in
+            load)
+              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=load k6 run /tests/scenarios/load-test.js
+              ;;
+            stress)
+              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=stress k6 run /tests/scenarios/stress-test.js
+              ;;
+            soak)
+              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=soak k6 run /tests/scenarios/soak-test.js
+              ;;
+            spike)
+              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=spike k6 run /tests/scenarios/spike-test.js
+              ;;
+            workflow)
+              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=workflow k6 run /tests/workflows/course-completion-workflow.js
+              ;;
+            endpoints)
+              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=endpoints k6 run /tests/endpoints/all-endpoints.js
+              ;;
+          esac
+      
+      - name: Export Grafana dashboards
+        if: always()
+        run: |
+          mkdir -p results/grafana
+          # Export dashboards (if Grafana API is accessible)
+          echo "Grafana is running at http://localhost:3000"
+      
+      - name: Collect Docker logs
+        if: always()
+        run: |
+          mkdir -p results/logs
+          docker-compose logs influxdb > results/logs/influxdb.log
+          docker-compose logs grafana > results/logs/grafana.log
+      
+      - name: Stop Docker services
+        if: always()
+        run: docker-compose down
+      
+      - name: Upload Docker test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-test-results-${{ github.run_number }}
+          path: results/
+          retention-days: 30
