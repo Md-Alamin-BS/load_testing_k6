@@ -215,11 +215,11 @@
               },
               {
                 "color": "yellow",
-                "value": 5000
+                "value": 15000
               },
               {
                 "color": "red",
-                "value": 10000
+                "value": 20000
               }
             ]
           },
@@ -307,7 +307,7 @@
               },
               {
                 "color": "yellow",
-                "value": 12000
+                "value": 15000
               },
               {
                 "color": "red",
@@ -491,11 +491,11 @@
               },
               {
                 "color": "red",
-                "value": 20000
+                "value": 25000
               }
             ]
           },
-          "unit": "ms"
+          "unit": "percent"
         }
       },
       "gridPos": {
