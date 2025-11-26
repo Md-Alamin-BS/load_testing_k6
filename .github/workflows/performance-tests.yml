@@ -267,14 +267,14 @@ jobs:
       
       - name: Start Docker services
         run: |
-          docker-compose up -d influxdb grafana
+          docker compose up -d influxdb grafana
           sleep 30  # Wait for services to be ready
       
       - name: Wait for InfluxDB to be ready
         run: |
           max_attempts=30
           attempt=0
-          until docker-compose exec -T influxdb influx ping || [ $attempt -eq $max_attempts ]; do
+          until docker compose exec -T influxdb influx ping || [ $attempt -eq $max_attempts ]; do
             echo "Waiting for InfluxDB to be ready... ($attempt/$max_attempts)"
             sleep 2
             attempt=$((attempt + 1))
@@ -288,61 +288,61 @@ jobs:
           case "$TEST_TYPE" in
             # Scenario Tests
             load)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=load k6 run /tests/scenarios/load-test.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=load k6 run /tests/scenarios/load-test.js
               ;;
             stress)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=stress k6 run /tests/scenarios/stress-test.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=stress k6 run /tests/scenarios/stress-test.js
               ;;
             soak)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=soak k6 run /tests/scenarios/soak-test.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=soak k6 run /tests/scenarios/soak-test.js
               ;;
             spike)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=spike k6 run /tests/scenarios/spike-test.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=spike k6 run /tests/scenarios/spike-test.js
               ;;
             edge-cases)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=edge-cases k6 run /tests/scenarios/edge-cases.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=edge-cases k6 run /tests/scenarios/edge-cases.js
               ;;
             
             # Workflow Tests
             workflow)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=workflow k6 run /tests/workflows/course-completion-workflow.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=workflow k6 run /tests/workflows/course-completion-workflow.js
               ;;
             
             # Endpoint Tests - All
             all-endpoints)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=all-endpoints k6 run /tests/endpoints/all-endpoints.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=all-endpoints k6 run /tests/endpoints/all-endpoints.js
               ;;
             
             # Endpoint Tests - Individual
             courses)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=courses k6 run /tests/endpoints/courses.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=courses k6 run /tests/endpoints/courses.js
               ;;
             course-by-id)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=course-by-id k6 run /tests/endpoints/course-by-id.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=course-by-id k6 run /tests/endpoints/course-by-id.js
               ;;
             topics)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=topics k6 run /tests/endpoints/topics.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=topics k6 run /tests/endpoints/topics.js
               ;;
             topics-by-id-courses)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=topics-by-id-courses k6 run /tests/endpoints/topics-by-id-courses.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=topics-by-id-courses k6 run /tests/endpoints/topics-by-id-courses.js
               ;;
             enroll)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=enroll k6 run /tests/endpoints/enroll.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=enroll k6 run /tests/endpoints/enroll.js
               ;;
             mycourses)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=mycourses k6 run /tests/endpoints/mycourses.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=mycourses k6 run /tests/endpoints/mycourses.js
               ;;
             update-progress)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=update-progress k6 run /tests/endpoints/update-progress.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=update-progress k6 run /tests/endpoints/update-progress.js
               ;;
             quiz-complete)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=quiz-complete k6 run /tests/endpoints/quiz-complete.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=quiz-complete k6 run /tests/endpoints/quiz-complete.js
               ;;
             recommendations)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=recommendations k6 run /tests/endpoints/recommendations.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=recommendations k6 run /tests/endpoints/recommendations.js
               ;;
             section-quizzes)
-              docker-compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=section-quizzes k6 run /tests/endpoints/section-quizzes.js
+              docker compose run --rm -e RUN_ID=$RUN_ID -e TEST_TYPE=section-quizzes k6 run /tests/endpoints/section-quizzes.js
               ;;
           esac
       
@@ -357,12 +357,12 @@ jobs:
         if: always()
         run: |
           mkdir -p results/logs
-          docker-compose logs influxdb > results/logs/influxdb.log
-          docker-compose logs grafana > results/logs/grafana.log
+          docker compose logs influxdb > results/logs/influxdb.log
+          docker compose logs grafana > results/logs/grafana.log
       
       - name: Stop Docker services
         if: always()
-        run: docker-compose down
+        run: docker compose down
       
       - name: Upload Docker test artifacts
         if: always()
