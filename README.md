@@ -25,7 +25,7 @@ A modular performance testing framework for API testing with real-time metrics v
 | `/courses` | GET | List courses |
 | `/courses/{id}` | GET | Course details |
 | `/enroll` | POST | Enroll in course |
-| `/courses/update_progress` | POST | Update progress |
+| `/courses/update_progress` | PUT | Update progress |
 | `/courses/{id}/sections/{idx}/quiz-complete` | POST | Submit quiz |
 | `/mycourses` | GET | Enrolled courses |
 | `/recommendations` | GET | Recommendations |
