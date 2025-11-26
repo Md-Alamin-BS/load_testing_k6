@@ -363,23 +363,12 @@ jobs:
               ;;
           esac
       
-      - name: Create results directories
-        if: always()
-        run: |
-          mkdir -p "${{ github.workspace }}/results/grafana"
-          mkdir -p "${{ github.workspace }}/results/logs"
-      
-      - name: Export Grafana dashboards
-        if: always()
-        run: |
-          # Export dashboards (if Grafana API is accessible)
-          echo "Grafana is running at http://localhost:3000"
-      
       - name: Collect Docker logs
         if: always()
         run: |
-          docker compose logs influxdb > "${{ github.workspace }}/results/logs/influxdb.log" 2>&1 || echo "No InfluxDB logs"
-          docker compose logs grafana > "${{ github.workspace }}/results/logs/grafana.log" 2>&1 || echo "No Grafana logs"
+          mkdir -p results/logs
+          docker compose logs influxdb > results/logs/influxdb.log 2>&1 || echo "No InfluxDB logs"
+          docker compose logs grafana > results/logs/grafana.log 2>&1 || echo "No Grafana logs"
       
       - name: Stop Docker services
         if: always()
