@@ -1,49 +1,144 @@
-# K6 InfluxDB Configuration
-# This file contains configuration for sending k6 metrics to InfluxDB
+# K6 InfluxDB Configuration Guide
 
-## InfluxDB v2 Configuration
-# Set these environment variables before running k6:
+## What This File Does
+This file explains how k6 test results are stored in InfluxDB and visualized in Grafana. Think of it as:
+- **k6** = The test runner (simulates users)
+- **InfluxDB** = The database (stores test results)
+- **Grafana** = The dashboard (shows pretty graphs)
 
-# K6_OUT=influxdb=http://localhost:8086
-# K6_INFLUXDB_ORGANIZATION=k6-org
-# K6_INFLUXDB_BUCKET=k6-metrics
-# K6_INFLUXDB_TOKEN=k6-admin-token-12345
-# K6_INFLUXDB_INSECURE=false
-# K6_INFLUXDB_PUSH_INTERVAL=10s
+---
 
-## Example k6 run command with InfluxDB output:
-# k6 run --out influxdb=http://localhost:8086 tests/scenarios/load-test.js
+## Current Setup (InfluxDB v1.8)
 
-## Tags to include in metrics:
-# All tests are configured to include the following tags:
-# - runId: Unique identifier for each test run
-# - testType: Type of test (load, stress, soak, spike)
-# - endpoint: API endpoint being tested
-# - workflow: Workflow name (for workflow tests)
-# - environment: Testing environment (dev, staging, prod)
+### How It Works
+When you run tests, k6 automatically sends metrics to InfluxDB. This is already configured in `docker-compose.yml`:
 
-## Custom Metrics
-# The framework sends the following custom metrics to InfluxDB:
-# - endpoint_errors: Counter for endpoint errors
-# - endpoint_successes: Counter for successful endpoint calls
-# - endpoint_duration: Trend for endpoint response times
-# - workflow_errors: Counter for workflow errors
-# - workflow_successes: Counter for successful workflows
-# - workflow_duration: Trend for workflow completion times
-# - workflow_step_duration: Trend for individual workflow step times
-# - course_enrollments: Counter for course enrollments
-# - quiz_completions: Counter for quiz completions
-# - progress_updates: Counter for progress updates
+```yaml
+K6_OUT=influxdb=http://influxdb:8086/k6
+```
 
-## InfluxDB Query Examples:
-# View all test runs:
-# from(bucket: "k6-metrics")
-#   |> range(start: -24h)
-#   |> filter(fn: (r) => r._measurement == "http_reqs")
-#   |> group(columns: ["runId"])
-#
-# View endpoint metrics for specific test run:
-# from(bucket: "k6-metrics")
-#   |> range(start: -24h)
-#   |> filter(fn: (r) => r.runId == "run-1" and r._measurement == "http_req_duration")
-#   |> group(columns: ["endpoint"])
+**Don't need to change anything!** The setup works automatically when Docker used.
+
+### Connection Details
+- **InfluxDB URL**: `http://localhost:8086` (from your computer) or `http://influxdb:8086` (from Docker)
+- **Database Name**: `k6`
+- **Port**: 8086
+
+---
+
+## What Metrics Are Collected?
+
+### Automatic K6 Metrics
+These are collected by k6 automatically:
+- **http_reqs**: Total number of HTTP requests
+- **http_req_duration**: How long each request took
+- **http_req_failed**: Number of failed requests
+- **vus**: Number of virtual users at any moment
+- **iterations**: How many times tests completed
+
+### Custom Metrics (Built into Our Tests)
+Our framework also tracks:
+- **endpoint_errors** / **endpoint_successes**: Success/failure counts per API endpoint
+- **endpoint_duration**: Response time for each endpoint
+- **workflow_errors** / **workflow_successes**: Success/failure of complete user workflows
+- **workflow_duration**: Time to complete entire workflows (like enrolling in a course)
+- **course_enrollments**: Number of course enrollments
+- **quiz_completions**: Number of quizzes completed
+- **progress_updates**: Number of progress updates
+
+### Test Tags (For Filtering Results)
+Every metric includes these labels for easy filtering:
+- **runId**: Unique ID for each test run (e.g., "run-1")
+- **testType**: Type of test (load, stress, soak, spike)
+- **endpoint**: Which API endpoint was called
+- **workflow**: Workflow name (for workflow tests)
+- **environment**: Environment tested (dev, staging, prod)
+
+---
+
+## How to Use
+
+### Running Tests (Data Goes to InfluxDB Automatically)
+```bash
+# Run any test - metrics auto-saved to InfluxDB
+docker-compose run k6 run /tests/scenarios/load-test.js
+
+# Or use the PowerShell script
+.\scripts\run-test.ps1 -TestType load
+```
+
+### Viewing Results in Grafana
+1. Go to `http://localhost:3000`
+2. Login: `admin` / `admin`
+3. Navigate to dashboards - your test results are already there!
+
+---
+
+## Querying InfluxDB (Advanced)
+
+If you want to query the database directly:
+
+### Connect to InfluxDB
+```bash
+docker exec -it k6-influxdb influx
+```
+
+### Example Queries
+
+**View all measurements (metric types):**
+```sql
+USE k6
+SHOW MEASUREMENTS
+```
+
+**See all test runs:**
+```sql
+SELECT * FROM http_reqs GROUP BY "runId" LIMIT 10
+```
+
+**Get response times for a specific endpoint:**
+```sql
+SELECT mean(value) FROM http_req_duration 
+WHERE endpoint = '/api/topics' 
+AND time > now() - 1h 
+GROUP BY time(1m)
+```
+
+**Count errors by endpoint:**
+```sql
+SELECT count(value) FROM http_req_failed 
+WHERE value > 0 
+GROUP BY endpoint
+```
+
+---
+
+## Troubleshooting
+
+### Can't See Metrics in Grafana?
+1. Check if InfluxDB is running: `docker ps` (should see k6-influxdb)
+2. Verify k6 is sending data: Look for `✓ output: InfluxDB` in test output
+3. Check Grafana data source: Go to Configuration → Data Sources → InfluxDB
+
+### Data Not Persisting?
+InfluxDB data is stored in a Docker volume (`influxdb-data`). To clear old data:
+```bash
+docker-compose down -v
+docker-compose up -d
+```
+
+### Need to Change Configuration?
+Edit `docker-compose.yml` and restart:
+```bash
+docker-compose down
+docker-compose up -d
+```
+
+---
+
+## Notes
+
+- This setup uses **InfluxDB v1.8** - the connection string and queries are different
+- All test files in `/tests` are pre-configured to send metrics to InfluxDB
+- Grafana dashboards in `/grafana/dashboards` are automatically loaded on startup
+- Data is retained until the Docker volume is manually deleted
