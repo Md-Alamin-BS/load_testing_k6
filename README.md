@@ -47,15 +47,15 @@ A modular performance testing framework for API testing with real-time metrics v
 **Should I install npm?**
 
 - **Use npm (Recommended)**: If you want simpler, shorter commands
-  - ✅ Easier to remember: `npm run test:load`
-  - ✅ Scripts handle long commands for you
-  - ✅ Good for regular testing
+  - Easier to remember: `npm run test:load`
+  - Scripts handle long commands for you
+  - Good for regular testing
   
 - **Use k6 directly (No npm)**: If you prefer not to install Node.js/npm
-  - ✅ Only need k6 installed
-  - ✅ Full control over command parameters
-  - ✅ No additional dependencies
-  - ⚠️ Commands are longer
+  - Only need k6 installed
+  - Full control over command parameters
+  - No additional dependencies
+  - Commands are longer
 
 **Both methods work identically** - choose based on your preference!
 
