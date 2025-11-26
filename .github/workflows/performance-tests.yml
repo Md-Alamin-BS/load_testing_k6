@@ -346,6 +346,10 @@ jobs:
               ;;
           esac
       
+      - name: Create results directory
+        if: always()
+        run: mkdir -p results
+      
       - name: Export Grafana dashboards
         if: always()
         run: |
