@@ -365,10 +365,10 @@ jobs:
       
       - name: Collect Docker logs
         if: always()
+        continue-on-error: true
         run: |
-          mkdir -p results/logs
-          docker compose logs influxdb > results/logs/influxdb.log 2>&1 || echo "No InfluxDB logs"
-          docker compose logs grafana > results/logs/grafana.log 2>&1 || echo "No Grafana logs"
+          docker compose logs influxdb > influxdb.log 2>&1 || true
+          docker compose logs grafana > grafana.log 2>&1 || true
       
       - name: Stop Docker services
         if: always()
@@ -379,6 +379,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: docker-test-results-${{ github.run_number }}
-          path: results/
+          path: |
+            influxdb.log
+            grafana.log
           retention-days: 30
  
