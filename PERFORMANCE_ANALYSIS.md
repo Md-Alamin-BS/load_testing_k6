@@ -39,7 +39,7 @@ I ran 4 different test scenarios to evaluate the API performance:
 
 ## Findings
 
-### Issue Found: Quiz Completion Endpoint
+### Issue 1: Quiz Completion Endpoint
 
 The `POST /courses/{course_id}/sections/{section_index}/quiz-complete` endpoint is returning 404 errors.
 
@@ -60,9 +60,47 @@ Endpoint Test: 1 failure (20% of quiz attempts)
 - Missing quiz records in the database for some course/section combinations
 - The test data is randomly selecting course IDs and section indices, and some combinations don't have quizzes set up
 
+### Issue 2: Negative Limit Parameter Causing Server Errors
+
+The `/recommendations` endpoint returns 500 Internal Server Error when given a negative limit value.
+
+**Details:**
+- Test Input: `limit=-10`
+- Response: `500 Internal Server Error`
+- Error Body: `"Internal Server Error"`
+- Failure Rate: 100% when negative limit is provided
+
+**Impact:**
+- Server crashes instead of validating input
+- Could be exploited for denial of service
+- Poor user experience with generic error messages
+
+**Expected Behavior:**
+- Should return 400 or 422 with validation error message
+- Should validate parameters before processing
+
+### Edge Cases Test Results
+
+Tested 10 different edge case scenarios with 1,921 total requests:
+
+**Passed (96.77%):**
+- ✅ Boundary values (progress 0%, 100%, 150%, negative)
+- ✅ Invalid IDs (999999, 0, -1, non-existent resources)
+- ✅ Malformed requests (empty payloads, missing fields, invalid JSON)
+- ✅ Duplicate enrollments
+- ✅ Invalid authentication tokens
+- ✅ Concurrent operations (race conditions)
+- ✅ SQL injection protection (properly validated)
+- ✅ XSS attack prevention
+- ✅ HTTP method violations
+- ✅ Pagination edge cases (page 0, -1, 99999, limit 0)
+
+**Failed (3.23%):**
+- ❌ Negative limit values (returns 500 instead of 400/422)
+
 ### Other Endpoints
 
-All other endpoints (topics, courses, enroll, update_progress, recommendations, etc.) performed well with 0% error rate.
+All other endpoints (topics, courses, enroll, update_progress, etc.) performed well with proper error handling and validation.
 
 ---
 
@@ -86,13 +124,20 @@ All other endpoints (topics, courses, enroll, update_progress, recommendations, 
    - Verify all course/section combinations have quiz records in the database
    - Add better error handling instead of returning 404
 
-2. **Add Monitoring**
-   - Track error rates for individual endpoints
-   - Set up alerts for error spikes
+2. **Add Input Validation for Query Parameters**
+   - Validate that limit values are positive integers
+   - Return 400 or 422 status codes with clear error messages instead of 500
+   - Apply validation to all numeric parameters (page, limit, user_id, etc.)
 
-3. **Consider Adding**
+3. **Add Monitoring**
+   - Track error rates for individual endpoints
+   - Set up alerts for 500 errors
+   - Monitor for suspicious patterns (repeated invalid inputs)
+
+4. **Consider Adding**
    - Rate limiting to prevent abuse
    - Database indexing for quiz lookups if not already present
+   - Request validation middleware to catch invalid inputs early
 
 ---
 

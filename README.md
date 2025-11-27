@@ -12,11 +12,12 @@ A modular performance testing framework for API testing with real-time metrics v
 
 ## Test Coverage
 
-### Performance Test Types (4)
+### Performance Test Types (5)
 - **Load Testing**: Normal traffic (10 users, 2 min)
 - **Stress Testing**: Find limits (5→20 users, 2.5 min)
 - **Soak Testing**: Long-term stability (5 users, 3 min)
 - **Spike Testing**: Traffic bursts (5→20 users spike, 1 min)
+- **Edge Cases Testing**: Invalid inputs & boundary values (5 users, 3 min)
 
 ### API Endpoints Tested (9)
 | Endpoint | Method | Purpose |
@@ -39,6 +40,8 @@ A modular performance testing framework for API testing with real-time metrics v
 - Requests per second (RPS)
 - Error rates
 - Workflow duration & success rates
+- Input validation & error handling
+- Security testing (SQL injection, XSS)
 
 ---
 
@@ -449,21 +452,25 @@ docker-compose logs        # View logs
 - Business impact analysis
 
 **Key Findings:**
-- Overall System Health: Excellent (99.54% success rate)
+- Overall System Health: Good (98.67% success rate across all tests)
 - Response Times: Best-in-class (P95: 95ms)
-- Critical Issue Identified: Quiz completion endpoint has 2-3% failure rate
+- Issues Identified:
+  - Quiz completion endpoint has 2-3% failure rate (missing data)
+  - Negative limit values cause server errors (500 instead of validation errors)
+- Security: SQL injection and XSS properly handled
 - Scalability: System handles 10-20 concurrent users with linear scaling
 
 ---
 
 ## Assignment Compliance
 
-- 4 performance test types (Load, Stress, Soak, Spike)
+- 5 performance test types (Load, Stress, Soak, Spike, Edge Cases)
 - 9 API endpoints tested
 - 1 end-to-end workflow
 - InfluxDB + Grafana reporting
 - Run ID filtering
 - All metrics (RPS, avg, p95, max, errors)
+- Input validation & security testing
 - No hardcoded credentials
 - Modular, maintainable code
 - CI/CD integration
@@ -472,4 +479,3 @@ docker-compose logs        # View logs
 - Grafana dashboards in JSON format (`grafana/dashboards/`)
 
 ---
-
