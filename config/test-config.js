@@ -27,6 +27,9 @@ export const config = {
     courses: '/courses',
     updateProgress: '/courses/update_progress',
     quizComplete: (courseId, sectionIndex) => `/courses/${courseId}/sections/${sectionIndex}/quiz-complete`,
+    myCourses: '/mycourses',
+    recommendations: '/recommendations',
+    topicCourses: (topicId) => `/topics/${topicId}/courses`,
   },
   
   http: {
