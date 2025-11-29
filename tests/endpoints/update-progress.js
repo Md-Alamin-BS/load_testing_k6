@@ -17,15 +17,15 @@ export const options = {
 };
 
 export function setup() {
-  const token = authenticate();
-  if (!token) {
+  const authData = authenticate();
+  if (!authData || !authData.token) {
     throw new Error('Authentication failed in setup phase');
   }
-  return { token };
+  return authData;
 }
 
 export default function (data) {
-  const { token } = data;
+  const token = data.token;
   const endpointName = 'POST /courses/update_progress';
   const startTime = Date.now();
   

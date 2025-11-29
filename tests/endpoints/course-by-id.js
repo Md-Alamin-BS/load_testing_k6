@@ -25,7 +25,7 @@ export function setup() {
 }
 
 export default function (data) {
-  const { token } = data;
+  const token = data.token;
   const endpointName = 'GET /courses/{id}';
   const startTime = Date.now();
   

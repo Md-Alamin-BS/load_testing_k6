@@ -1,11 +1,11 @@
 name: Scheduled Performance Tests
 
 on:
-  # Run daily at 2 AM UTC
-  schedule:
-    - cron: '0 2 * * *'
+  # DISABLED: Daily schedule - uncomment to enable automatic runs
+  # schedule:
+  #   - cron: '0 2 * * *'
   
-  # Manual trigger
+  # Manual trigger only
   workflow_dispatch:
 
 env:
@@ -34,6 +34,9 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
           sudo apt-get install k6
+      
+      - name: Create results directory
+        run: mkdir -p results
       
       - name: Run Load Test
         env:
@@ -75,6 +78,9 @@ jobs:
           echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
           sudo apt-get update
           sudo apt-get install k6
+      
+      - name: Create results directory
+        run: mkdir -p results
       
       - name: Run Stress Test
         env:

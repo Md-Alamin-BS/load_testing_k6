@@ -41,9 +41,9 @@ on:
           - docker-only
           - both
   
-  # Scheduled execution (optional - runs every day at 2 AM UTC)
-  schedule:
-    - cron: '0 2 * * *'
+  # DISABLED: Scheduled execution - uncomment to enable daily runs at 2 AM UTC
+  # schedule:
+  #   - cron: '0 2 * * *'
   
   # Run on pull requests (optional)
   pull_request:
@@ -113,6 +113,9 @@ jobs:
       
       - name: Verify k6 installation
         run: k6 version
+      
+      - name: Create results directory
+        run: mkdir -p results
       
       - name: Run Performance Test
         id: k6_test
@@ -192,10 +195,6 @@ jobs:
               exit 1
               ;;
           esac
-      
-      - name: Create results directory
-        if: always()
-        run: mkdir -p results
       
       - name: Generate test report
         if: always()

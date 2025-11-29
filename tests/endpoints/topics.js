@@ -17,21 +17,27 @@ export const options = {
 };
 
 export function setup() {
-  const token = authenticate();
-  if (!token) {
+  const authData = authenticate();
+  if (!authData || !authData.token) {
     throw new Error('Authentication failed in setup phase');
   }
-  return { token };
+  return authData;
 }
 
 export default function (data) {
-  const { token } = data;
+  const token = data.token;
   const endpointName = 'GET /topics';
   const startTime = Date.now();
   
-  // Generate query parameters
+  // Generate query parameters - k6 compatible (no URLSearchParams)
   const filters = generateTopicFilters();
-  const queryString = new URLSearchParams(filters).toString();
+  const queryParts = [];
+  for (const key in filters) {
+    if (filters.hasOwnProperty(key)) {
+      queryParts.push(`${encodeURIComponent(key)}=${encodeURIComponent(filters[key])}`);
+    }
+  }
+  const queryString = queryParts.join('&');
   const url = `${config.baseUrl}${config.endpoints.topics}${queryString ? '?' + queryString : ''}`;
   
   const params = createAuthParams(token, {
